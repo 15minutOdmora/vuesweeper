@@ -3,17 +3,17 @@
     <div>
       <header>
         <div>{{ bombsRemaining }}</div>
-        <button @click="reset">{{ gameStatus }}</button>
+        <button id="reset-button" @click="reset">{{ gameStatus }}</button>
         <TimerCounter :gameInProgress="gameInProgress" />
       </header>
       <div class="board" :style="gridStyle">
-        <TileItem v-for="(tile, index) in tiles" :key="index" :tile="tile" @reveal="reveal(index)" />
+        <TileItem
+          v-for="(tile, index) in tiles"
+          :key="index"
+          :tile="tile"
+          @reveal="reveal(index)"
+        />
       </div>
-      <footer>
-        <div>Field size:</div>
-        <input v-model="tileCount"/>
-        <button @click="updateField">Apply</button>
-      </footer>
     </div>
   </div>
 </template>
@@ -21,7 +21,15 @@
 <script>
 import TileItem from "./components/TileItem.vue";
 import TimerCounter from "./components/TimerCounter.vue";
-import { generateTiles, getCoordinates, totalNumberOfBombs, surroundingIndexes, getIndex } from "./utils";
+import {
+  generateTiles,
+  getCoordinates,
+  totalNumberOfBombs,
+  surroundingIndexes,
+  getIndex,
+} from "./utils";
+
+const defaultSize = 10
 
 export default {
   name: "App",
@@ -31,9 +39,9 @@ export default {
   },
   data: function () {
     return {
-      tiles: generateTiles(10),
-      tileCount: 10,
-      rowsAndColumns: 10,
+      tiles: generateTiles(defaultSize),
+      tileCount: defaultSize,
+      rowsAndColumns: defaultSize,
       totalNumberOfBombs: 0,
     };
   },
@@ -43,22 +51,22 @@ export default {
       return this.bombsCount - totalFlags;
     },
     bombsCount() {
-      return this.tiles.filter((tile) => tile.bomb).length
+      return this.tiles.filter((tile) => tile.bomb).length;
     },
     gameInProgress() {
-      if(this.gameWon || this.gameFailed) {
+      if (this.gameWon || this.gameFailed) {
         return false;
       }
-      if(this.tiles.find(tile => tile.revealed)) {
+      if (this.tiles.find((tile) => tile.revealed)) {
         return true;
       }
       return false;
     },
     gameFailed() {
-      return this.tiles.find(tile => tile.bomb && tile.revealed)
+      return this.tiles.find((tile) => tile.bomb && tile.revealed);
     },
     gameWon() {
-      const revealedTIles = this.tiles.filter(tile => tile.revealed).length;
+      const revealedTIles = this.tiles.filter((tile) => tile.revealed).length;
       return revealedTIles + totalNumberOfBombs == 100;
     },
     gameStatus() {
@@ -73,11 +81,11 @@ export default {
     },
     gridStyle() {
       return {
-        display: 'grid',
-        'grid-template-rows': `repeat(${this.rowsAndColumns}, auto)`,
-        'grid-template-columns': `repeat(${this.rowsAndColumns}, auto)`,
-      }
-    }
+        display: "grid",
+        "grid-template-rows": `repeat(${this.rowsAndColumns}, auto)`,
+        "grid-template-columns": `repeat(${this.rowsAndColumns}, auto)`,
+      };
+    },
   },
   methods: {
     reset() {
@@ -93,28 +101,28 @@ export default {
       if (!tile.revealed) {
         tile.revealed = true;
 
-        if(!tile.bomb && tile.surroundingBombs == 0) {
-          const { row, column } = getCoordinates(index)
+        if (!tile.bomb && tile.surroundingBombs == 0) {
+          const { row, column } = getCoordinates(index);
 
           for (const i of surroundingIndexes) {
             for (const j of surroundingIndexes) {
-                this.reveal(getIndex(row + i, column + j))
+              this.reveal(getIndex(row + i, column + j));
             }
           }
         }
       }
     },
     updateField() {
-      console.log(this.tileCount)
-      this.tiles = generateTiles(this.tileCount)
-      this.rowsAndColumns = this.tileCount
+      console.log(this.tileCount);
+      this.tiles = generateTiles(this.tileCount);
+      this.rowsAndColumns = this.tileCount;
     },
     clearField() {
-      this.tiles.forEach(tile => {
-        console.log(tile)
-        tile.revealed = true
-      })
-      this.bombsRemaining
+      this.tiles.forEach((tile) => {
+        console.log(tile);
+        tile.revealed = true;
+      });
+      this.bombsRemaining;
     },
   },
 };
@@ -125,7 +133,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   font-family: "Courier New", Courier, monospace;
+  padding: 5%;
   font-weight: 700;
 }
 
@@ -134,27 +144,39 @@ header {
   justify-content: space-between;
   margin: 20px 0;
   font-size: 2em;
-}
-
-footer {
-  display: flex;
-  align-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   padding: 5%;
 }
 
-#input {
-  width: 10%;
-}
-
-/*
 .board {
-  display: grid;
-  grid-template-rows: repeat(10, auto);
-  grid-template-columns: repeat(10, auto);
+  max-width: 800px;
 }
-*/
 
-button {
-  font-size: inherit;
+#reset-button {
+  display: inline-block;
+  outline: none;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  border-radius: 500px;
+  transition-property: background-color, border-color, color, box-shadow, filter;
+  transition-duration: 0.3s;
+  border: 1px solid transparent;
+  letter-spacing: 2px;
+  min-width: 80px;
+  text-transform: uppercase;
+  white-space: normal;
+  font-weight: 700;
+  text-align: center;
+  padding: 16px 14px 18px;
+  color: #616467;
+  box-shadow: inset 0 0 0 2px #616467;
+  background-color: transparent;
+  height: 48px;
+}
+
+#reset-button:hover {
+  color: #fff;
+  background-color: #616467;
 }
 </style>
