@@ -15,19 +15,18 @@ export function getCoordinates(index) {
     };
 }
 
-export function generateTiles () {
-    const bombs = Array.from({ length: 100 })
+export function generateTiles (amount) {
+    const squaredAmount = amount * amount
+    const bombs = Array.from({ length: squaredAmount })
 
-    let plantedBombs = 0
-    while (plantedBombs !== totalNumberOfBombs) {
-        const index = Math.floor(Math.random() * 100)
+    const bombPercentage = 0.15
 
-        if (!bombs[index]) {
-            bombs[index] = 1
-            plantedBombs++
+    for (let i = 0; i < bombs.length; i++) {
+        if (Math.random() <= bombPercentage) {
+            bombs[i] = 1
         }
     }
-
+    console.log(bombs)
     return bombs.map((bomb, index, array) => {
         const { row, column } = getCoordinates(index)
 

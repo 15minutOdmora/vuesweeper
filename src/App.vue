@@ -6,16 +6,21 @@
         <button @click="reset">{{ gameStatus }}</button>
         <TimerCounter :gameInProgress="gameInProgress" />
       </header>
-      <div class="board">
+      <div class="board" :style="gridStyle">
         <TileItem v-for="(tile, index) in tiles" :key="index" :tile="tile" @reveal="reveal(index)" />
       </div>
+      <footer>
+        <div>Field size:</div>
+        <input v-model="tileCount"/>
+        <button @click="updateField">Apply</button>
+      </footer>
     </div>
   </div>
 </template>
 
 <script>
 import TileItem from "./components/TileItem.vue";
-import TimerCounter from "./components/TimerCounter.vue"
+import TimerCounter from "./components/TimerCounter.vue";
 import { generateTiles, getCoordinates, totalNumberOfBombs, surroundingIndexes, getIndex } from "./utils";
 
 export default {
@@ -26,17 +31,22 @@ export default {
   },
   data: function () {
     return {
-      tiles: generateTiles(),
+      tiles: generateTiles(10),
+      tileCount: 10,
+      rowsAndColumns: 10,
+      totalNumberOfBombs: 0,
     };
   },
   computed: {
     bombsRemaining() {
       const totalFlags = this.tiles.filter((tile) => tile.flagged).length;
-      console.log(totalNumberOfBombs);
-      return totalNumberOfBombs - totalFlags;
+      return this.bombsCount - totalFlags;
+    },
+    bombsCount() {
+      return this.tiles.filter((tile) => tile.bomb).length
     },
     gameInProgress() {
-      if(this.gameWon ||this.gameFailed) {
+      if(this.gameWon || this.gameFailed) {
         return false;
       }
       if(this.tiles.find(tile => tile.revealed)) {
@@ -53,17 +63,25 @@ export default {
     },
     gameStatus() {
       if (this.gameFailed) {
+        this.clearField();
         return "😥";
       }
       if (this.gameWon) {
         return "😎";
       }
       return "😊";
+    },
+    gridStyle() {
+      return {
+        display: 'grid',
+        'grid-template-rows': `repeat(${this.rowsAndColumns}, auto)`,
+        'grid-template-columns': `repeat(${this.rowsAndColumns}, auto)`,
+      }
     }
   },
   methods: {
     reset() {
-      this.tiles = generateTiles();
+      this.tiles = generateTiles(this.tileCount);
     },
     reveal(index) {
       if (index == undefined) {
@@ -85,7 +103,19 @@ export default {
           }
         }
       }
-    }
+    },
+    updateField() {
+      console.log(this.tileCount)
+      this.tiles = generateTiles(this.tileCount)
+      this.rowsAndColumns = this.tileCount
+    },
+    clearField() {
+      this.tiles.forEach(tile => {
+        console.log(tile)
+        tile.revealed = true
+      })
+      this.bombsRemaining
+    },
   },
 };
 </script>
@@ -106,11 +136,23 @@ header {
   font-size: 2em;
 }
 
+footer {
+  display: flex;
+  align-content: space-between;
+  padding: 5%;
+}
+
+#input {
+  width: 10%;
+}
+
+/*
 .board {
   display: grid;
   grid-template-rows: repeat(10, auto);
   grid-template-columns: repeat(10, auto);
 }
+*/
 
 button {
   font-size: inherit;
